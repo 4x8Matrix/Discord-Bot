@@ -1,0 +1,23 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "⚒️ Aftman: Install project tooling",
+			"detail": "Installs the tooling required to run the 'DiscordLuaU' library.",
+			"type": "shell",
+			"command": "aftman install --no-trust-check ",
+			"group": {
+				"kind": "build"
+			},
+		},
+		{
+			"label": "🚀 Lune: Launch Discord Bot",
+			"detail": "Launch the Discord Bot using Lune",
+			"type": "shell",
+			"command": "lune Source",
+			"group": {
+				"kind": "build"
+			},
+		}
+	]
+}
