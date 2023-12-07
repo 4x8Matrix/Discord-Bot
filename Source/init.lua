@@ -3,11 +3,13 @@ local DotEnv = require("../.env")
 
 local DiscordCommands = require("Classes/DiscordCommands")
 local DiscordStatus = require("Classes/DiscordStatus")
+local DiscordAI = require("Classes/DiscordAI")
 
 local Console = require("Dependencies/Github/Console")
 
 local DiscordClient = DiscordAPI.DiscordClient.new(
-	DiscordAPI.DiscordSettings.new()
+	DiscordAPI.DiscordSettings
+		.new()
 		:SetDiscordToken(DotEnv.DISCORD_BOT_TOKEN)
 		:SetIntents(DiscordAPI.DiscordIntents.all())
 )
@@ -24,15 +26,22 @@ DiscordClient:Subscribe("OnReady", function()
 	DiscordClient.Commands:UpdateCommands()
 end)
 
-DiscordClient:SetVerboseLogging(true)
+DiscordClient:Subscribe("OnMessage", function(discordMessageObject)
+	DiscordClient.AI:ProcessDiscordMessage(discordMessageObject)
+end)
+
+-- DiscordClient:SetVerboseLogging(true)
 
 Console.setGlobalSchema("[💿][%s][%s]: %s")
 DiscordAPI.Console.setGlobalSchema("[📀][%s][%s]: %s")
 
-DiscordClient:ConnectAsync():andThen(function()
-	DiscordClient.RuntimeReporter = Console.new("DiscordClient")
-	DiscordClient.Status = DiscordStatus.new(DiscordClient)
-	DiscordClient.Commands = DiscordCommands.new(DiscordClient)
-end):catch(function(exceptionMessage)
-	print(`Discord bot failed to launch: {exceptionMessage}`)
-end)
+DiscordClient:ConnectAsync()
+	:andThen(function()
+		DiscordClient.RuntimeReporter = Console.new("DiscordClient")
+		DiscordClient.Status = DiscordStatus.new(DiscordClient)
+		DiscordClient.Commands = DiscordCommands.new(DiscordClient)
+		DiscordClient.AI = DiscordAI.new(DiscordClient)
+	end)
+	:catch(function(exceptionMessage)
+		print(`Discord bot failed to launch: {exceptionMessage}`)
+	end)

@@ -91,10 +91,20 @@ function DiscordCommands.Prototype:LoadHotCommands()
 	end
 end
 
+function DiscordCommands.Prototype:DestroyAllExistingCommands()
+	self.DiscordClient.Application:GetAllGuildCommandsAsync(737382889947136000):andThen(function(guildCommands)
+		for _, guildCommandMetadata in guildCommands do
+			self.DiscordClient.Application:DeleteGuildCommandAsync(737382889947136000, guildCommandMetadata.id):await()
+
+			self.Reporter:Log(`Deleted command '{guildCommandMetadata.name}'`)
+		end
+	end)
+end
+
 function DiscordCommands.Interface.new(discordClient)
 	local self = setmetatable({
 		DiscordClient = discordClient,
-		
+
 		Reporter = Console.new("DiscordCommands"),
 
 		CommandGroupCount = 0,
@@ -103,7 +113,7 @@ function DiscordCommands.Interface.new(discordClient)
 		CommandGroups = {},
 		CommandModules = {},
 
-		InteractionReferences = {}
+		InteractionReferences = {},
 	}, { __index = DiscordCommands.Prototype })
 
 	self:LoadHotCommands()
